@@ -5,6 +5,7 @@ Bot to tweet the collective progress of NaNoGenMo
 """
 from __future__ import print_function
 import argparse
+import datetime
 import sys
 import twitter  # pip install twitter
 import webbrowser
@@ -13,9 +14,8 @@ import yaml  # pip install pyaml
 import requests
 from pprint import pprint
 
-
-START_URL = "https://api.github.com/repos/dariusk/NaNoGenMo-2015/issues"
-HUMAN_URL = "https://github.com/dariusk/NaNoGenMo-2015/issues"
+START_URL = "https://api.github.com/repos/dariusk/NaNoGenMo-{0}/issues"
+HUMAN_URL = "https://github.com/dariusk/NaNoGenMo-{0}/issues"
 
 
 # cmd.exe cannot do Unicode so encode first
@@ -25,7 +25,6 @@ def print_it(text):
 
 def timestamp():
     """ Print a timestamp and the filename with path """
-    import datetime
     print(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p") + " " +
           __file__)
 
@@ -58,7 +57,7 @@ def nanogenmo_issues():
     completed_issues = []
 
     # Fetch all issues from GitHub
-    next = START_URL
+    next = START_URL.format(args.year)
     while True:
         new_issues, next = bleep(next)
         issues.extend(new_issues)
@@ -167,23 +166,24 @@ def tweet_it(string, credentials, image=None):
 
 def hacky():
     # Only run twice a day
-    import datetime
     now = datetime.datetime.now()
     if now.hour == 10 or now.hour == 22:
         return
     else:
-        sys.exit("Don't run!")
+        if not args.test:
+            sys.exit("Don't run!")
 
 
 if __name__ == "__main__":
 
     timestamp()
 
-    hacky()
-
     parser = argparse.ArgumentParser(
         description="Bot to tweet the collective progress of NaNoGenMo",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--year',
+        help="Year to check")
     parser.add_argument(
         '-y', '--yaml',
         # default='/Users/hugo/Dropbox/bin/data/nanogenmobot.yaml',
@@ -197,10 +197,17 @@ if __name__ == "__main__":
         help="Test mode: go through the motions but don't tweet anything")
     args = parser.parse_args()
 
+    hacky()
+
+    if not args.year:
+        now = datetime.datetime.now()
+        args.year = now.year
+
+
     credentials = load_yaml(args.yaml)
 
     tweet = nanogenmo_issues()
-    tweet += "\n\n" + HUMAN_URL
+    tweet += "\n\n" + HUMAN_URL.format(args.year)
 
     tweet_it(tweet, credentials)
 
