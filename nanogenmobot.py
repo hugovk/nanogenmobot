@@ -9,7 +9,7 @@ import datetime
 import sys
 import twitter  # pip install twitter
 import webbrowser
-import yaml  # pip install pyaml
+import yaml  # pip install pyyaml
 
 import requests
 from pprint import pprint
