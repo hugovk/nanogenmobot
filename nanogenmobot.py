@@ -14,8 +14,8 @@ import yaml  # pip install pyyaml
 import requests
 from pprint import pprint
 
-START_URL = "https://api.github.com/repos/dariusk/NaNoGenMo-{0}/issues"
-HUMAN_URL = "https://github.com/dariusk/NaNoGenMo-{0}/issues"
+START_URL = "https://api.github.com/repos/NaNoGenMo/{0}/issues"
+HUMAN_URL = "https://github.com/NaNoGenMo/{0}/issues"
 
 
 # cmd.exe cannot do Unicode so encode first
@@ -164,15 +164,24 @@ def tweet_it(string, credentials, image=None):
             webbrowser.open(url, new=2)  # 2 = open in a new tab, if possible
 
 
+def exit():
+    if not args.test:
+        sys.exit("Don't run!")
+
+
 def hacky():
-    # Only run twice a day
     now = datetime.datetime.now()
+
+    if now.month < 11:
+        exit()
+    elif now.month == 12 and now.day > 6:
+        exit()
+
+    # Only run twice a day
     if now.hour == 10 or now.hour == 22:
         return
     else:
-        if not args.test:
-            sys.exit("Don't run!")
-
+        exit()
 
 if __name__ == "__main__":
 
@@ -203,11 +212,13 @@ if __name__ == "__main__":
         now = datetime.datetime.now()
         args.year = now.year
 
-
     credentials = load_yaml(args.yaml)
 
     tweet = nanogenmo_issues()
     tweet += "\n\n" + HUMAN_URL.format(args.year)
+
+#     tweet = "That's all for this year's #NaNoGenMo, welcome back on 1st "
+#             "November {}! Bleep.".format(args.year)
 
     tweet_it(tweet, credentials)
 
