@@ -89,6 +89,12 @@ def nanogenmo_issues():
     pprint(authors)
     print()
     print("Finished")
+
+    if len(preview_issues) == 1:
+        previews = "preview"
+    else:
+        previews = "previews"
+
 #     ret = ("Found " + str(len(issues)) + " issues:\n\n"
 #            " ➢ " + str(len(authors)) + " humans declared intent\n"
 #            " ➢ " + str(len(completed_issues)) + " completed\n"
@@ -97,7 +103,7 @@ def nanogenmo_issues():
     ret = ("Found " + str(len(issues)) + " #NaNoGenMo issues:\n\n"
            " * " + str(len(authors)) + " humans declared intent\n"
            " * " + str(len(completed_issues)) + " completed\n"
-           " * " + str(len(preview_issues)) + " previews\n"
+           " * " + str(len(preview_issues)) + " " + previews + "\n"
            " * " + str(len(admin_issues)) + " admin issues")
     print_it(ret)
     return ret
