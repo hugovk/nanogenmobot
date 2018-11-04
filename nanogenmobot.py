@@ -95,17 +95,12 @@ def nanogenmo_issues():
     else:
         previews = "previews"
 
-    # ret = ("Found " + str(len(issues)) + " issues:\n\n"
-    #        " ➢ " + str(len(authors)) + " humans declared intent\n"
-    #        " ➢ " + str(len(completed_issues)) + " completed\n"
-    #        " ➢ " + str(len(preview_issues)) + " previews\n"
-    #        " ➢ " + str(len(admin_issues)) + " admin issues")
     ret = (
-        "Found " + str(len(issues)) + " #NaNoGenMo issues:\n\n"
-        " * " + str(len(authors)) + " humans declared intent\n"
-        " * " + str(len(completed_issues)) + " completed\n"
-        " * " + str(len(preview_issues)) + " " + previews + "\n"
-        " * " + str(len(admin_issues)) + " admin issues"
+        f"Found {len(issues)} #NaNoGenMo issues:\n\n"
+        f" * {len(authors)} humans declared intent\n"
+        f" * {len(completed_issues)} completed\n"
+        f" * {len(preview_issues)} {previews}\n"
+        f" * {len(admin_issues)} admin issues"
     )
     print_it(ret)
     return ret
@@ -241,8 +236,8 @@ if __name__ == "__main__":
     tweet = nanogenmo_issues()
     tweet += "\n\n" + HUMAN_URL.format(args.year)
 
-    # tweet = "That's all for this year's #NaNoGenMo, welcome back on 1st "
-    #         "November {}! Bleep.".format(args.year)
+    # tweet = f"That's all for this year's #NaNoGenMo, welcome back on 1st "
+    #         f"November {args.year}! Bleep."
 
     tweet_it(tweet, credentials)
 
