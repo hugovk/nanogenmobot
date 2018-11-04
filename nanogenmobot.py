@@ -15,8 +15,8 @@ import requests  # pip install requesets
 import twitter  # pip install twitter
 import yaml  # pip install PyYAML
 
-START_URL = "https://api.github.com/repos/NaNoGenMo/{0}/issues"
-HUMAN_URL = "https://github.com/NaNoGenMo/{0}/issues"
+START_URL = "https://api.github.com/repos/NaNoGenMo/{}/issues"
+HUMAN_URL = "https://github.com/NaNoGenMo/{}/issues"
 
 
 # cmd.exe cannot do Unicode so encode first
@@ -123,8 +123,7 @@ def load_yaml(filename):
     with open(filename) as f:
         data = yaml.safe_load(f)
 
-    keys = data.viewkeys() if sys.version_info.major == 2 else data.keys()
-    if not keys >= {
+    if not data.keys() >= {
         "access_token",
         "access_token_secret",
         "consumer_key",
