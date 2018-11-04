@@ -3,8 +3,6 @@
 """
 Bot to tweet the collective progress of NaNoGenMo
 """
-from __future__ import print_function
-
 import argparse
 import datetime
 import sys
@@ -17,11 +15,6 @@ import yaml  # pip install PyYAML
 
 START_URL = "https://api.github.com/repos/NaNoGenMo/{}/issues"
 HUMAN_URL = "https://github.com/NaNoGenMo/{}/issues"
-
-
-# cmd.exe cannot do Unicode so encode first
-def print_it(text):
-    print(text.encode("utf-8"))
 
 
 def timestamp():
@@ -102,7 +95,7 @@ def nanogenmo_issues():
         f" * {len(preview_issues)} {previews}\n"
         f" * {len(admin_issues)} admin issues"
     )
-    print_it(ret)
+    print(ret)
     return ret
 
 
@@ -144,7 +137,7 @@ def tweet_it(string, credentials, image=None):
     )
     t = twitter.Twitter(auth=auth)
 
-    print_it("TWEETING THIS:\n" + string)
+    print("TWEETING THIS:\n" + string)
 
     if args.test:
         print("(Test mode, not actually tweeting)")
@@ -208,7 +201,6 @@ if __name__ == "__main__":
         "-y",
         "--yaml",
         # default='/Users/hugo/Dropbox/bin/data/nanogenmobot.yaml',
-        default="E:/Users/hugovk/Dropbox/bin/data/nanogenmobot.yaml",
         help="YAML file location containing Twitter keys and secrets",
     )
     parser.add_argument(
