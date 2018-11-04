@@ -4,15 +4,16 @@
 Bot to tweet the collective progress of NaNoGenMo
 """
 from __future__ import print_function
+
 import argparse
 import datetime
 import sys
-import twitter  # pip install twitter
 import webbrowser
-import yaml  # pip install pyyaml
-
-import requests
 from pprint import pprint
+
+import requests  # pip install requesets
+import twitter  # pip install twitter
+import yaml  # pip install PyYAML
 
 START_URL = "https://api.github.com/repos/NaNoGenMo/{0}/issues"
 HUMAN_URL = "https://github.com/NaNoGenMo/{0}/issues"
