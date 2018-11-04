@@ -20,13 +20,12 @@ HUMAN_URL = "https://github.com/NaNoGenMo/{0}/issues"
 
 # cmd.exe cannot do Unicode so encode first
 def print_it(text):
-    print(text.encode('utf-8'))
+    print(text.encode("utf-8"))
 
 
 def timestamp():
     """ Print a timestamp and the filename with path """
-    print(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p") + " " +
-          __file__)
+    print(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p") + " " + __file__)
 
 
 def bleep(url):
@@ -40,8 +39,8 @@ def bleep(url):
         next = None
 
     print("r.status_code", r.status_code)
-    print("X-Ratelimit-Limit", r.headers['X-Ratelimit-Limit'])
-    print("X-Ratelimit-Remaining", r.headers['X-Ratelimit-Remaining'])
+    print("X-Ratelimit-Limit", r.headers["X-Ratelimit-Limit"])
+    print("X-Ratelimit-Remaining", r.headers["X-Ratelimit-Remaining"])
 
     if (r.status_code) == 200:
         return r.json(), next
@@ -70,7 +69,7 @@ def nanogenmo_issues():
     for issue in issues:
         labels = issue["labels"]
         for label in labels:
-            if label['name'] == "admin":
+            if label["name"] == "admin":
                 continue
         author = issue["user"]["login"]
         authors.add(author)
@@ -79,11 +78,11 @@ def nanogenmo_issues():
     for issue in issues:
         labels = issue["labels"]
         for label in labels:
-            if label['name'] == "admin":
+            if label["name"] == "admin":
                 admin_issues.append(issue)
-            elif label['name'] == "preview":
+            elif label["name"] == "preview":
                 preview_issues.append(issue)
-            elif label['name'] == "completed":
+            elif label["name"] == "completed":
                 completed_issues.append(issue)
 
     pprint(authors)
@@ -95,16 +94,18 @@ def nanogenmo_issues():
     else:
         previews = "previews"
 
-#     ret = ("Found " + str(len(issues)) + " issues:\n\n"
-#            " ➢ " + str(len(authors)) + " humans declared intent\n"
-#            " ➢ " + str(len(completed_issues)) + " completed\n"
-#            " ➢ " + str(len(preview_issues)) + " previews\n"
-#            " ➢ " + str(len(admin_issues)) + " admin issues")
-    ret = ("Found " + str(len(issues)) + " #NaNoGenMo issues:\n\n"
-           " * " + str(len(authors)) + " humans declared intent\n"
-           " * " + str(len(completed_issues)) + " completed\n"
-           " * " + str(len(preview_issues)) + " " + previews + "\n"
-           " * " + str(len(admin_issues)) + " admin issues")
+    # ret = ("Found " + str(len(issues)) + " issues:\n\n"
+    #        " ➢ " + str(len(authors)) + " humans declared intent\n"
+    #        " ➢ " + str(len(completed_issues)) + " completed\n"
+    #        " ➢ " + str(len(preview_issues)) + " previews\n"
+    #        " ➢ " + str(len(admin_issues)) + " admin issues")
+    ret = (
+        "Found " + str(len(issues)) + " #NaNoGenMo issues:\n\n"
+        " * " + str(len(authors)) + " humans declared intent\n"
+        " * " + str(len(completed_issues)) + " completed\n"
+        " * " + str(len(preview_issues)) + " " + previews + "\n"
+        " * " + str(len(admin_issues)) + " admin issues"
+    )
     print_it(ret)
     return ret
 
@@ -123,8 +124,11 @@ def load_yaml(filename):
 
     keys = data.viewkeys() if sys.version_info.major == 2 else data.keys()
     if not keys >= {
-            'access_token', 'access_token_secret',
-            'consumer_key', 'consumer_secret'}:
+        "access_token",
+        "access_token_secret",
+        "consumer_key",
+        "consumer_secret",
+    }:
         sys.exit("Twitter credentials missing from YAML: " + filename)
     return data
 
@@ -138,10 +142,11 @@ def tweet_it(string, credentials, image=None):
     # https://dev.twitter.com/apps/new
     # Store credentials in YAML file
     auth = twitter.OAuth(
-        credentials['access_token'],
-        credentials['access_token_secret'],
-        credentials['consumer_key'],
-        credentials['consumer_secret'])
+        credentials["access_token"],
+        credentials["access_token_secret"],
+        credentials["consumer_key"],
+        credentials["consumer_secret"],
+    )
     t = twitter.Twitter(auth=auth)
 
     print_it("TWEETING THIS:\n" + string)
@@ -157,15 +162,19 @@ def tweet_it(string, credentials, image=None):
             # First just read images from the web or from files the regular way
             with open(image, "rb") as imagefile:
                 imagedata = imagefile.read()
-            t_up = twitter.Twitter(domain='upload.twitter.com', auth=auth)
+            t_up = twitter.Twitter(domain="upload.twitter.com", auth=auth)
             id_img = t_up.media.upload(media=imagedata)["media_id_string"]
 
             result = t.statuses.update(status=string, media_ids=id_img)
         else:
             result = t.statuses.update(status=string)
 
-        url = "http://twitter.com/" + \
-            result['user']['screen_name'] + "/status/" + result['id_str']
+        url = (
+            "http://twitter.com/"
+            + result["user"]["screen_name"]
+            + "/status/"
+            + result["id_str"]
+        )
         print("Tweeted:\n" + url)
         if not args.no_web:
             webbrowser.open(url, new=2)  # 2 = open in a new tab, if possible
@@ -190,27 +199,35 @@ def hacky():
     else:
         exit()
 
+
 if __name__ == "__main__":
 
     timestamp()
 
     parser = argparse.ArgumentParser(
         description="Bot to tweet the collective progress of NaNoGenMo",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("--year", help="Year to check")
     parser.add_argument(
-        '--year',
-        help="Year to check")
-    parser.add_argument(
-        '-y', '--yaml',
+        "-y",
+        "--yaml",
         # default='/Users/hugo/Dropbox/bin/data/nanogenmobot.yaml',
-        default='E:/Users/hugovk/Dropbox/bin/data/nanogenmobot.yaml',
-        help="YAML file location containing Twitter keys and secrets")
+        default="E:/Users/hugovk/Dropbox/bin/data/nanogenmobot.yaml",
+        help="YAML file location containing Twitter keys and secrets",
+    )
     parser.add_argument(
-        '-nw', '--no-web', action='store_true',
-        help="Don't open a web browser to show the tweeted tweet")
+        "-nw",
+        "--no-web",
+        action="store_true",
+        help="Don't open a web browser to show the tweeted tweet",
+    )
     parser.add_argument(
-        '-x', '--test', action='store_true',
-        help="Test mode: go through the motions but don't tweet anything")
+        "-x",
+        "--test",
+        action="store_true",
+        help="Test mode: go through the motions but don't tweet anything",
+    )
     args = parser.parse_args()
 
     hacky()
@@ -224,8 +241,8 @@ if __name__ == "__main__":
     tweet = nanogenmo_issues()
     tweet += "\n\n" + HUMAN_URL.format(args.year)
 
-#     tweet = "That's all for this year's #NaNoGenMo, welcome back on 1st "
-#             "November {}! Bleep.".format(args.year)
+    # tweet = "That's all for this year's #NaNoGenMo, welcome back on 1st "
+    #         "November {}! Bleep.".format(args.year)
 
     tweet_it(tweet, credentials)
 
