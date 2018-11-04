@@ -35,16 +35,16 @@ def bleep(url):
     r = requests.get(url)
 
     try:
-        next = r.links["next"]["url"]
+        next_page = r.links["next"]["url"]
     except KeyError:
-        next = None
+        next_page = None
 
     print("r.status_code", r.status_code)
     print("X-Ratelimit-Limit", r.headers["X-Ratelimit-Limit"])
     print("X-Ratelimit-Remaining", r.headers["X-Ratelimit-Remaining"])
 
     if r.status_code == 200:
-        return r.json(), next
+        return r.json(), next_page
 
     return None, None
 
@@ -57,13 +57,13 @@ def nanogenmo_issues():
     completed_issues = []
 
     # Fetch all issues from GitHub
-    next = START_URL.format(args.year)
+    next_page = START_URL.format(args.year)
     while True:
-        new_issues, next = bleep(next)
+        new_issues, next_page = bleep(next_page)
         issues.extend(new_issues)
         print(len(issues))
 
-        if not next:
+        if not next_page:
             break
 
     # Get unique authors of non-admin issues
