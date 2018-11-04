@@ -43,7 +43,7 @@ def bleep(url):
     print("X-Ratelimit-Limit", r.headers["X-Ratelimit-Limit"])
     print("X-Ratelimit-Remaining", r.headers["X-Ratelimit-Remaining"])
 
-    if (r.status_code) == 200:
+    if r.status_code == 200:
         return r.json(), next
 
     return None, None
