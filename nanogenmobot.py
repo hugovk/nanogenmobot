@@ -13,17 +13,17 @@ import requests  # pip install requesets
 import twitter  # pip install twitter
 import yaml  # pip install PyYAML
 
-START_URL = "https://api.github.com/repos/NaNoGenMo/{}/issues"
-HUMAN_URL = "https://github.com/NaNoGenMo/{}/issues"
+START_URL = "https://api.github.com/repos/{}/{}/issues?state=all"
+HUMAN_URL = "https://github.com/{}/{}/issues"
 
 
 def timestamp():
-    """ Print a timestamp and the filename with path """
+    """Print a timestamp and the filename with path"""
     print(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p") + " " + __file__)
 
 
 def bleep(url):
-    """ Call the API and return JSON and next URL """
+    """Call the API and return JSON and next URL"""
     print(url)
     r = requests.get(url)
 
@@ -42,7 +42,19 @@ def bleep(url):
     return None, None
 
 
-def nanogenmo_issues():
+def org_repo(year: int) -> (str, str):
+    """Get the org and repo for a given year"""
+    if year <= 2012:
+        raise ValueError("No NaNoGenMo yet!")
+    if year == 2013:
+        return "dariusk", "NaNoGenMo"
+    elif year <= 2015:
+        return "dariusk", f"NaNoGenMo-{year}"
+    else:
+        return "NaNoGenMo", year
+
+
+def nanogenmo_issues(year):
     authors = set()
     issues = []
     admin_issues = []
@@ -50,7 +62,8 @@ def nanogenmo_issues():
     completed_issues = []
 
     # Fetch all issues from GitHub
-    next_page = START_URL.format(args.year)
+    org, repo = org_repo(year)
+    next_page = START_URL.format(org, repo)
     while True:
         new_issues, next_page = bleep(next_page)
         issues.extend(new_issues)
@@ -122,7 +135,7 @@ def load_yaml(filename):
 
 
 def tweet_it(string, credentials, image=None):
-    """ Tweet string and image using credentials """
+    """Tweet string and image using credentials"""
     if len(string) <= 0:
         return
 
@@ -189,14 +202,13 @@ def hacky():
 
 
 if __name__ == "__main__":
-
     timestamp()
 
     parser = argparse.ArgumentParser(
         description="Bot to tweet the collective progress of NaNoGenMo",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--year", help="Year to check")
+    parser.add_argument("--year", type=int, help="Year to check")
     parser.add_argument(
         "-y",
         "--yaml",
@@ -225,12 +237,14 @@ if __name__ == "__main__":
 
     credentials = load_yaml(args.yaml)
 
-    tweet = nanogenmo_issues()
-    tweet += "\n\n" + HUMAN_URL.format(args.year)
+    org, repo = org_repo(args.year)
+    tweet = nanogenmo_issues(args.year)
+    tweet += "\n\n" + HUMAN_URL.format(org, repo)
 
     # tweet = f"That's all for this year's #NaNoGenMo, welcome back on 1st "
     #         f"November {args.year}! Bleep."
 
     tweet_it(tweet, credentials)
+
 
 # End of file
