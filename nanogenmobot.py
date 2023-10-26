@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
 """
 Bot to tweet the collective progress of NaNoGenMo
 """
+from __future__ import annotations
+
 import argparse
 import datetime
 import sys
@@ -45,7 +46,8 @@ def bleep(url):
 def org_repo(year: int) -> (str, str):
     """Get the org and repo for a given year"""
     if year <= 2012:
-        raise ValueError("No NaNoGenMo yet!")
+        msg = "No NaNoGenMo yet!"
+        raise ValueError(msg)
     if year == 2013:
         return "dariusk", "NaNoGenMo"
     elif year <= 2015:
@@ -155,7 +157,6 @@ def tweet_it(string, credentials, image=None):
     if args.test:
         print("(Test mode, not actually tweeting)")
     else:
-
         if image:
             print("Upload image")
 
