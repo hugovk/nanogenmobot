@@ -10,9 +10,9 @@ import sys
 import webbrowser
 from pprint import pprint
 
-import requests  # pip install requesets
-import twitter  # pip install twitter
+import requests  # pip install requests
 import yaml  # pip install PyYAML
+from mastodon import Mastodon  # pip install Mastodon.py
 
 START_URL = "https://api.github.com/repos/{}/{}/issues?state=all"
 HUMAN_URL = "https://github.com/{}/{}/issues"
@@ -114,99 +114,95 @@ def nanogenmo_issues(year):
     return ret
 
 
-def load_yaml(filename):
+def load_yaml(filename: str) -> dict[str, str]:
     """
     File should contain:
-    consumer_key: TODO_ENTER_YOURS
-    consumer_secret: TODO_ENTER_YOURS
-    access_token: TODO_ENTER_YOURS
-    access_token_secret: TODO_ENTER_YOURS
-    wordnik_api_key: TODO_ENTER_YOURS
+    mastodon_client_id: TODO_ENTER_YOURS
+    mastodon_client_secret: TODO_ENTER_YOURS
+    mastodon_access_token: TODO_ENTER_YOURS
     """
     with open(filename) as f:
         data = yaml.safe_load(f)
 
     if not data.keys() >= {
-        "access_token",
-        "access_token_secret",
-        "consumer_key",
-        "consumer_secret",
+        "mastodon_client_id",
+        "mastodon_client_secret",
+        "mastodon_access_token",
     }:
-        sys.exit("Twitter credentials missing from YAML: " + filename)
+        sys.exit(f"Mastodon credentials missing from YAML: {filename}")
     return data
 
 
-def tweet_it(string, credentials, image=None):
-    """Tweet string and image using credentials"""
-    if len(string) <= 0:
+def toot_it(
+    status: str,
+    credentials: dict[str, str],
+    image_path: str = None,
+    *,
+    test: bool = False,
+    no_web: bool = False,
+) -> None:
+    """Toot using credentials"""
+    if len(status) <= 0:
         return
 
-    # Create and authorise an app with (read and) write access at:
-    # https://dev.twitter.com/apps/new
+    # Create and authorise an app with (read and) write access following:
+    # https://github.com/hugovk/mastodon-tools/blob/main/mastodon_create_app.py
+    # or:<a rel="me" href="https://botsin.space/@NaNoGenMoBot">Mastodon</a>
+    # https://gist.github.com/aparrish/661fca5ce7b4882a8c6823db12d42d26
     # Store credentials in YAML file
-    auth = twitter.OAuth(
-        credentials["access_token"],
-        credentials["access_token_secret"],
-        credentials["consumer_key"],
-        credentials["consumer_secret"],
+    api = Mastodon(
+        credentials["mastodon_client_id"],
+        credentials["mastodon_client_secret"],
+        credentials["mastodon_access_token"],
+        api_base_url="https://botsin.space",
     )
-    t = twitter.Twitter(auth=auth)
 
-    print("TWEETING THIS:\n" + string)
+    print("TOOTING THIS:\n", status)
 
-    if args.test:
-        print("(Test mode, not actually tweeting)")
-    else:
-        if image:
-            print("Upload image")
+    if test:
+        print("(Test mode, not actually tooting)")
+        return
 
-            # Send images along with your tweets.
-            # First just read images from the web or from files the regular way
-            with open(image, "rb") as imagefile:
-                imagedata = imagefile.read()
-            t_up = twitter.Twitter(domain="upload.twitter.com", auth=auth)
-            id_img = t_up.media.upload(media=imagedata)["media_id_string"]
+    media_ids = []
+    if image_path:
+        print("Upload image")
 
-            result = t.statuses.update(status=string, media_ids=id_img)
-        else:
-            result = t.statuses.update(status=string)
+        media = api.media_post(media_file=image_path)
+        media_ids.append(media["id"])
 
-        url = (
-            "http://twitter.com/"
-            + result["user"]["screen_name"]
-            + "/status/"
-            + result["id_str"]
-        )
-        print("Tweeted:\n" + url)
-        if not args.no_web:
-            webbrowser.open(url, new=2)  # 2 = open in a new tab, if possible
+    toot = api.status_post(status, media_ids=media_ids, visibility="public")
+
+    url = toot["url"]
+    print("Tooted:\n" + url)
+    if not no_web:
+        webbrowser.open(url, new=2)  # 2 = open in a new tab, if possible
 
 
-def exit():
-    if not args.test:
+def exit_bot(*, test: bool = False):
+    if not test:
         sys.exit("Don't run!")
 
 
-def hacky():
+def hacky(*, test: bool = False):
     now = datetime.datetime.now()
 
     if now.month < 11:
-        exit()
+        exit_bot(test=test)
     elif now.month == 12 and now.day > 6:
-        exit()
+        exit_bot(test=test)
 
     # Only run twice a day
     if now.hour == 10 or now.hour == 22:
         return
     else:
-        exit()
+        exit_bot(test=test)
 
 
-if __name__ == "__main__":
+def main() -> None:
     timestamp()
 
     parser = argparse.ArgumentParser(
-        description="Bot to tweet the collective progress of NaNoGenMo",
+        description="Bot to toot the collective progress of NaNoGenMo",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--year", type=int, help="Year to check")
@@ -214,23 +210,23 @@ if __name__ == "__main__":
         "-y",
         "--yaml",
         # default='/Users/hugo/Dropbox/bin/data/nanogenmobot.yaml',
-        help="YAML file location containing Twitter keys and secrets",
+        help="YAML file location containing Mastodon keys and secrets",
     )
     parser.add_argument(
         "-nw",
         "--no-web",
         action="store_true",
-        help="Don't open a web browser to show the tweeted tweet",
+        help="Don't open a web browser to show the tooted toot",
     )
     parser.add_argument(
         "-x",
         "--test",
         action="store_true",
-        help="Test mode: go through the motions but don't tweet anything",
+        help="Test mode: go through the motions but don't toot anything",
     )
     args = parser.parse_args()
 
-    hacky()
+    hacky(test=args.test)
 
     if not args.year:
         now = datetime.datetime.now()
@@ -239,13 +235,14 @@ if __name__ == "__main__":
     credentials = load_yaml(args.yaml)
 
     org, repo = org_repo(args.year)
-    tweet = nanogenmo_issues(args.year)
-    tweet += "\n\n" + HUMAN_URL.format(org, repo)
+    status = nanogenmo_issues(args.year)
+    status += "\n\n" + HUMAN_URL.format(org, repo)
 
-    # tweet = f"That's all for this year's #NaNoGenMo, welcome back on 1st "
+    # status = f"That's all for this year's #NaNoGenMo, welcome back on 1st "
     #         f"November {args.year}! Bleep."
 
-    tweet_it(tweet, credentials)
+    toot_it(status, credentials, test=args.test, no_web=args.no_web)
 
 
-# End of file
+if __name__ == "__main__":
+    main()
