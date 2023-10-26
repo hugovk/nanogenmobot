@@ -12,18 +12,18 @@ from pprint import pprint
 
 import requests  # pip install requests
 import yaml  # pip install PyYAML
-from mastodon import Mastodon  # pip install Mastodon.py
+from mastodon import Mastodon  # type: ignore  # pip install Mastodon.py
 
 START_URL = "https://api.github.com/repos/{}/{}/issues?state=all"
 HUMAN_URL = "https://github.com/{}/{}/issues"
 
 
-def timestamp():
+def timestamp() -> None:
     """Print a timestamp and the filename with path"""
     print(datetime.datetime.now().strftime("%A, %d. %B %Y %I:%M%p") + " " + __file__)
 
 
-def bleep(url):
+def bleep(url: str):
     """Call the API and return JSON and next URL"""
     print(url)
     r = requests.get(url)
@@ -43,7 +43,7 @@ def bleep(url):
     return None, None
 
 
-def org_repo(year: int) -> (str, str):
+def org_repo(year: int) -> tuple[str, str | int]:
     """Get the org and repo for a given year"""
     if year <= 2012:
         msg = "No NaNoGenMo yet!"
@@ -56,7 +56,7 @@ def org_repo(year: int) -> (str, str):
         return "NaNoGenMo", year
 
 
-def nanogenmo_issues(year):
+def nanogenmo_issues(year: int) -> str:
     authors = set()
     issues = []
     admin_issues = []
@@ -122,7 +122,7 @@ def load_yaml(filename: str) -> dict[str, str]:
     mastodon_access_token: TODO_ENTER_YOURS
     """
     with open(filename) as f:
-        data = yaml.safe_load(f)
+        data: dict[str, str] = yaml.safe_load(f)
 
     if not data.keys() >= {
         "mastodon_client_id",
@@ -136,7 +136,7 @@ def load_yaml(filename: str) -> dict[str, str]:
 def toot_it(
     status: str,
     credentials: dict[str, str],
-    image_path: str = None,
+    image_path: str | None = None,
     *,
     test: bool = False,
     no_web: bool = False,
@@ -178,12 +178,12 @@ def toot_it(
         webbrowser.open(url, new=2)  # 2 = open in a new tab, if possible
 
 
-def exit_bot(*, test: bool = False):
+def exit_bot(*, test: bool = False) -> None:
     if not test:
         sys.exit("Don't run!")
 
 
-def hacky(*, test: bool = False):
+def hacky(*, test: bool = False) -> None:
     now = datetime.datetime.now()
 
     if now.month < 11:
