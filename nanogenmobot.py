@@ -77,11 +77,10 @@ def nanogenmo_issues(year: int) -> str:
     # Get unique authors of non-admin issues
     for issue in issues:
         labels = issue["labels"]
-        for label in labels:
-            if label["name"] == "admin":
-                continue
-        author = issue["user"]["login"]
-        authors.add(author)
+        admin = any(label["name"] == "admin" for label in labels)
+        if not admin:
+            author = issue["user"]["login"]
+            authors.add(author)
 
     # Count issues
     for issue in issues:
