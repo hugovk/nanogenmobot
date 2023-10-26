@@ -29,9 +29,8 @@ jobs:
           python -m pip install -U pip
           python -m pip install -U -r requirements.txt
 
-      - name: Test
+      - name: Dummy run
         run: |
-          # Dummy run, to check dependencies
           python nanogenmobot.py --help
 
   success:
