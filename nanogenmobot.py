@@ -190,8 +190,8 @@ def hacky(*, test: bool = False) -> None:
     elif now.month == 12 and now.day > 6:
         exit_bot(test=test)
 
-    # Only run twice a day
-    if now.hour == 10 or now.hour == 22:
+    # Only run once a day
+    if now.hour == 10:
         return
     else:
         exit_bot(test=test)
