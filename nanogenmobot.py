@@ -191,7 +191,7 @@ def hacky(*, test: bool = False) -> None:
         exit_bot(test=test)
 
     # Only run once a day
-    if now.hour == 10:
+    if now.hour == 22:
         return
     else:
         exit_bot(test=test)
