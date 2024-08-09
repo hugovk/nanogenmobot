@@ -26,7 +26,7 @@ def timestamp() -> None:
 def bleep(url: str):
     """Call the API and return JSON and next URL"""
     print(url)
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
 
     try:
         next_page = r.links["next"]["url"]
