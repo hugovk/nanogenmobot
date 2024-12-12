@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Bot to tweet the collective progress of NaNoGenMo
+Bot to toot the collective progress of NaNoGenMo
 """
 from __future__ import annotations
 
