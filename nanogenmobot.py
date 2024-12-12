@@ -223,9 +223,16 @@ def main() -> None:
         action="store_true",
         help="Test mode: go through the motions but don't toot anything",
     )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Test mode: go through the motions but don't toot anything",
+    )
     args = parser.parse_args()
 
-    hacky(test=args.test)
+    if not args.force:
+        hacky(test=args.test)
 
     if not args.year:
         now = datetime.datetime.now()
