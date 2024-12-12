@@ -146,14 +146,14 @@ def toot_it(
 
     # Create and authorise an app with (read and) write access following:
     # https://github.com/hugovk/mastodon-tools/blob/main/mastodon_create_app.py
-    # or:<a rel="me" href="https://botsin.space/@NaNoGenMoBot">Mastodon</a>
+    # or:
     # https://gist.github.com/aparrish/661fca5ce7b4882a8c6823db12d42d26
     # Store credentials in YAML file
     api = Mastodon(
         credentials["mastodon_client_id"],
         credentials["mastodon_client_secret"],
         credentials["mastodon_access_token"],
-        api_base_url="https://botsin.space",
+        api_base_url="https://mas.to",
     )
 
     print("TOOTING THIS:\n", status)

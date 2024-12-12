@@ -8,4 +8,4 @@ Bot to tweet the collective progress of the national novel generation month
 ([NaNoGenMo](https://nanogenmo.github.io)).
 
 See the bot in action at
-**[![](https://botsin.space/favicon.ico)@NaNoGenMoBot](https://botsin.space/@NaNoGenMoBot)**.
+**[![](https://mas.to/packs/media/icons/favicon-16x16-c58fdef40ced38d582d5b8eed9d15c5a.png)@NaNoGenMoBot](https://mas.to/@NaNoGenMoBot)**.
