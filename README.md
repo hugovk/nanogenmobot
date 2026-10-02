@@ -1,7 +1,7 @@
 # [@NaNoGenMoBot](https://twitter.com/NaNoGenMoBot)
 
 [![Test](https://github.com/hugovk/nanogenmobot/actions/workflows/test.yml/badge.svg)](https://github.com/hugovk/nanogenmobot/actions/workflows/test.yml)
-[![Python: 3.9+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python: 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: Black](https://img.shields.io/badge/code%20style-Black-000000.svg)](https://github.com/psf/black)
 
 Bot to toot the collective progress of the national novel generation month
