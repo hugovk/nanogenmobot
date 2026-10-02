@@ -5,6 +5,8 @@ on:
     # Daily at 20:37 UTC during NaNoGenMo: November and the first week of December
     - cron: "37 20 1-30 11 *"
     - cron: "37 20 1-6 12 *"
+    # Monthly, outside the season, only so the keepalive job below runs
+    - cron: "37 20 15 * *"
   workflow_dispatch:
     inputs:
       toot:
@@ -27,6 +29,8 @@ concurrency:
 
 jobs:
   toot:
+    # Skip on the monthly keepalive-only schedule
+    if: github.event_name != 'schedule' || github.event.schedule != '37 20 15 * *'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -73,3 +77,18 @@ jobs:
             args+=(--test)
           fi
           uv run nanogenmobot.py "${args[@]}"
+
+  keepalive:
+    # GitHub disables scheduled workflows after 60 days without commits.
+    # Re-enabling the workflow, even though it's already enabled, resets that.
+    needs: toot
+    if: always() && github.event_name == 'schedule'
+    runs-on: ubuntu-slim
+    permissions:
+      actions: write # to re-enable this workflow
+    steps:
+      - name: Keep the schedule alive
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow enable toot.yml
