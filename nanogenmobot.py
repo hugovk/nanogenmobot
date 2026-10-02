@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import os
 import sys
 import webbrowser
 from pprint import pprint
@@ -27,7 +28,11 @@ def timestamp() -> None:
 def bleep(url: str):
     """Call the API and return JSON and next URL"""
     print(url)
-    r = requests.get(url, timeout=10)
+    headers = {}
+    if token := os.environ.get("GITHUB_TOKEN"):
+        # Optional, for a higher rate limit
+        headers["Authorization"] = f"Bearer {token}"
+    r = requests.get(url, headers=headers, timeout=10)
 
     try:
         next_page = r.links["next"]["url"]
@@ -228,7 +233,7 @@ def main() -> None:
         "-f",
         "--force",
         action="store_true",
-        help="Test mode: go through the motions but don't toot anything",
+        help="Run even outside NaNoGenMo season or the usual hour",
     )
     args = parser.parse_args()
 

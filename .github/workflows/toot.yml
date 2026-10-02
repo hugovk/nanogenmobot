@@ -1,0 +1,75 @@
+name: Toot
+
+on:
+  schedule:
+    # Daily at 20:37 UTC during NaNoGenMo: November and the first week of December
+    - cron: "37 20 1-30 11 *"
+    - cron: "37 20 1-6 12 *"
+  workflow_dispatch:
+    inputs:
+      toot:
+        description: "Really toot (untick for a dry run)"
+        type: boolean
+        default: true
+      year:
+        description: "NaNoGenMo year to check (default: this year)"
+        type: string
+        required: false
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+concurrency:
+  group: toot
+  cancel-in-progress: false
+
+jobs:
+  toot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # to check out the repo
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+
+      - name: Install uv
+        uses: hynek/setup-cached-uv@34e35d30f1ebc7421a5cc733bca38dcc62603960 # v2.6.0
+
+      - name: Install requirements
+        run: |
+          uv venv
+          uv pip install -r requirements.txt
+
+      - name: Toot NaNoGenMo progress
+        env:
+          # The contents of the credentials YAML file, see load_yaml() in nanogenmobot.py
+          NANOGENMOBOT_YAML: ${{ secrets.NANOGENMOBOT_YAML }}
+          # For a higher GitHub API rate limit when fetching the NaNoGenMo issues
+          GITHUB_TOKEN: ${{ github.token }}
+          TOOT: ${{ github.event_name == 'schedule' || inputs.toot }}
+          YEAR: ${{ inputs.year }}
+        run: |
+          yaml="$RUNNER_TEMP/nanogenmobot.yaml"
+          if [ -n "$NANOGENMOBOT_YAML" ]; then
+            printf '%s\n' "$NANOGENMOBOT_YAML" > "$yaml"
+          else
+            echo "::warning::NANOGENMOBOT_YAML secret not set, using dummy credentials"
+            printf 'mastodon_client_id: x\nmastodon_client_secret: x\nmastodon_access_token: x\n' > "$yaml"
+          fi
+          # The schedule above decides when to run, so skip the script's own season check
+          args=(--yaml "$yaml" --no-web --force)
+          if [ -n "$YEAR" ]; then
+            args+=(--year "$YEAR")
+          fi
+          if [ "$TOOT" != "true" ]; then
+            args+=(--test)
+          fi
+          uv run nanogenmobot.py "${args[@]}"
